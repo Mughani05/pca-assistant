@@ -57,11 +57,15 @@ st.markdown("""
     }
     
     .user-message {
-        margin-left: 2rem;
+        margin-left: 0;
+        margin-right: 2rem;
+        max-width: 70%;
     }
     
     .bot-message {
         margin-right: 2rem;
+        margin-left: 0;
+        max-width: 70%;
     }
     
     .message-time {
@@ -87,7 +91,7 @@ BOT_RESPONSES = {
 
 def get_logo_base64():
     """Load logo image and return as base64 string"""
-    logo_path = "ag.png"  # You can change this to your logo file name
+    logo_path = "ag.png"
     
     if os.path.exists(logo_path):
         with open(logo_path, "rb") as image_file:
