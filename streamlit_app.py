@@ -9,10 +9,15 @@ st.set_page_config(
     page_title="Ag Chat",
     page_icon="🌱",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': None
+    }
 )
 
-# Custom CSS for better styling
+# Force light theme
 st.markdown("""
 <style>
     .main-header {
@@ -52,12 +57,10 @@ st.markdown("""
     }
     
     .user-message {
-        background-color: #2e2e2e;
         margin-left: 2rem;
     }
     
     .bot-message {
-        background-color: #2e2e2e;
         margin-right: 2rem;
     }
     
@@ -65,23 +68,6 @@ st.markdown("""
         font-size: 0.7rem;
         color: #666;
         margin-top: 0.5rem;
-    }
-    
-    .stTextInput > div > div > input {
-        border-radius: 25px;
-        border: 2px solid #e0e0e0;
-    }
-    
-    .stButton > button {
-        border-radius: 25px;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 0.5rem 2rem;
-    }
-    
-    .stButton > button:hover {
-        background: linear-gradient(90deg, #5a6fd8 0%, #6a4190 100%);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -151,7 +137,9 @@ def main():
     
     with chat_container:
         for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
+            # Get icon with default fallback for older messages
+            icon = message.get("icon", "💬")  # Default icon if not present
+            with st.chat_message(message["role"], avatar=icon):
                 st.markdown(f"""
                 <div class="chat-message {'user-message' if message['role'] == 'user' else 'bot-message'}">
                     <div>
@@ -169,7 +157,8 @@ def main():
         st.session_state.messages.append({
             "role": "user", 
             "content": prompt, 
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "icon": "👤",
         })
         
         # Get bot response
@@ -180,7 +169,8 @@ def main():
         st.session_state.messages.append({
             "role": "assistant", 
             "content": bot_response, 
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "icon": "🧑‍🌾",
         })
         
         # Rerun to display new messages
