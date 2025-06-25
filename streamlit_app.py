@@ -3,6 +3,10 @@ import time
 from datetime import datetime
 import base64
 import os
+import requests
+import uuid
+#N8N_URL = "https://mohammadmend.app.n8n.cloud/webhook-test/pca-chat"
+N8N_URL="https://mohammadmend.app.n8n.cloud/webhook/pca-chat"
 
 # Page configuration
 st.set_page_config(
@@ -88,6 +92,20 @@ BOT_RESPONSES = {
     "thank you": "You're welcome!",
     "default": "I'm a simple chatbot. I can respond to basic greetings and questions."
 }
+def ask_n8n(session_id: str, text: str) -> str:
+    payload = {"sessionId": session_id, "text": text}
+    try:
+        r = requests.post(N8N_URL, json=payload, timeout=30)
+        r.raise_for_status()
+        data = r.json()
+        return (
+            data.get("answer")           # preferred
+            or data.get("output")        # current n8n field
+            or "No answer field in response."
+        )
+    except Exception as exc:
+        return f"Error contacting the assistant: {exc}"
+
 
 def get_logo_base64():
     """Load logo image and return as base64 string"""
@@ -101,23 +119,14 @@ def get_logo_base64():
         # Return a simple placeholder if logo doesn't exist
         return ""
 
-def get_bot_response(user_input):
+def get_bot_response(user_input: str) -> str:
     """Get bot response based on user input"""
-    user_input_lower = user_input.lower().strip()
-    
-    # Simple keyword matching
-    if any(word in user_input_lower for word in ["hello", "hi", "hey"]):
-        return BOT_RESPONSES["hello"]
-    elif "how are you" in user_input_lower:
-        return BOT_RESPONSES["how are you"]
-    elif "what can you do" in user_input_lower or "help" in user_input_lower:
-        return BOT_RESPONSES["what can you do"]
-    elif any(word in user_input_lower for word in ["bye", "goodbye"]):
-        return BOT_RESPONSES["bye"]
-    elif any(word in user_input_lower for word in ["thanks", "thank you"]):
-        return BOT_RESPONSES["thanks"]
-    else:
-        return BOT_RESPONSES["default"]
+    """Forward the message to n8n and return its answer."""
+    # ensure we keep a stable session ID per browser tab
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+
+    return ask_n8n(st.session_state.session_id, user_input)
 
 def main():
     # Header with logo
