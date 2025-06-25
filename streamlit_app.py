@@ -1,6 +1,8 @@
 import streamlit as st
 import time
 from datetime import datetime
+import base64
+import os
 
 # Page configuration
 st.set_page_config(
@@ -18,10 +20,27 @@ st.markdown("""
         font-weight: bold;
         text-align: center;
         margin-bottom: 2rem;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #9b7bb8;
+    }
+    
+    .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .logo-image {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+    }
+    
+    .logo-text {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #9b7bb8;
     }
     
     .chat-message {
@@ -80,6 +99,18 @@ BOT_RESPONSES = {
     "default": "I'm a simple chatbot. I can respond to basic greetings and questions."
 }
 
+def get_logo_base64():
+    """Load logo image and return as base64 string"""
+    logo_path = "ag.png"  # You can change this to your logo file name
+    
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+        return encoded_string
+    else:
+        # Return a simple placeholder if logo doesn't exist
+        return ""
+
 def get_bot_response(user_input):
     """Get bot response based on user input"""
     user_input_lower = user_input.lower().strip()
@@ -99,8 +130,17 @@ def get_bot_response(user_input):
         return BOT_RESPONSES["default"]
 
 def main():
-    # Header
-    st.markdown('<h1 class="main-header">🌱 AgChat</h1>', unsafe_allow_html=True)
+    # Header with logo
+    try:
+        st.markdown("""
+        <div class="logo-container">
+            <img src="data:image/png;base64,{}" class="logo-image" alt="Bonipak Logo">
+            <div class="logo-text">Bonipak</div>
+        </div>
+        """.format(get_logo_base64()), unsafe_allow_html=True)
+    except:
+        # Fallback to text only if logo fails to load
+        st.markdown('<h1 class="main-header">🌱 Bonipak</h1>', unsafe_allow_html=True)
     
     # Initialize chat history
     if "messages" not in st.session_state:
